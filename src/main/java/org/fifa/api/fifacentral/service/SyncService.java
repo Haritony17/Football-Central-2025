@@ -1,16 +1,17 @@
 package org.fifa.api.fifacentral.service;
 
-
 import lombok.RequiredArgsConstructor;
 import org.fifa.api.fifacentral.dao.CentralClubDAO;
 import org.fifa.api.fifacentral.dao.CentralPlayerDAO;
-import org.fifa.api.fifacentral.entity.CentralClub;
-import org.fifa.api.fifacentral.entity.CentralPlayer;
-import org.fifa.api.fifacentral.entity.Championship;
-import org.fifa.api.fifacentral.entity.ChampionshipData;
+import org.fifa.api.fifacentral.entity.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -18,29 +19,48 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class SyncService {
-    private final ChampionshipApiClient apiClient;
+    private static final Logger logger = LoggerFactory.getLogger(SyncService.class);
+
+    private final RestTemplate restTemplate;
     private final CentralClubDAO clubRepository;
     private final CentralPlayerDAO playerRepository;
 
-
-    public void syncAllChampionships(String season) {
-        syncChampionship(Championship.PREMIER_LEAGUE, season);
-        syncChampionship(Championship.LA_LIGA, season);
-        syncChampionship(Championship.BUNDESLIGA, season);
-        syncChampionship(Championship.SERIA, season);
-        syncChampionship(Championship.LIGUE_1, season);
+    public void syncAllChampionships(String season, String apiKey) {
+        for (Championship championship : Championship.values()) {
+            try {
+                syncChampionship(championship, season, apiKey);
+            } catch (Exception e) {
+                logger.error("Failed to sync {}: {}", championship, e.getMessage());
+            }
+        }
     }
 
-    private void syncChampionship(Championship championship, String season) {
-        ChampionshipData data = apiClient.fetchChampionshipData(championship, season);
+    private void syncChampionship(Championship championship, String season, String apiKey) {
+        String url = getChampionshipUrl(championship) + "/api/seasons/" + season + "/stats";
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("X-API-KEY", apiKey);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<ChampionshipData> response = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                entity,
+                ChampionshipData.class
+        );
+
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            throw new RuntimeException("Failed to fetch data for " + championship);
+        }
+
+        ChampionshipData data = response.getBody();
         LocalDateTime now = LocalDateTime.now();
 
         if (data.getClubs() != null) {
             List<CentralClub> clubs = data.getClubs().stream()
-                    .map(club -> {
+                    .peek(club -> {
                         club.setChampionship(championship);
                         club.setLastSync(now);
-                        return club;
                     })
                     .toList();
             clubRepository.saveAll(clubs);
@@ -48,13 +68,22 @@ public class SyncService {
 
         if (data.getPlayers() != null) {
             List<CentralPlayer> players = data.getPlayers().stream()
-                    .map(player -> {
+                    .peek(player -> {
                         player.setChampionship(championship);
                         player.setLastSync(now);
-                        return player;
                     })
                     .toList();
             playerRepository.saveAll(players);
         }
+    }
+
+    private String getChampionshipUrl(Championship championship) {
+        return switch (championship) {
+            case PREMIER_LEAGUE -> "http://localhost:8082";
+            case LA_LIGA -> "http://localhost:8083";
+            case BUNDESLIGA -> "http://localhost:8084";
+            case SERIA -> "http://localhost:8085";
+            case LIGUE_1 -> "http://localhost:8086";
+        };
     }
 }

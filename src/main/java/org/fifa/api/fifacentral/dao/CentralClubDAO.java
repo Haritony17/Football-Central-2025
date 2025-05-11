@@ -8,6 +8,8 @@ import org.fifa.api.fifacentral.entity.Championship;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -76,6 +78,29 @@ public class CentralClubDAO {
                     ps.setInt(12, club.getCleanSheetNumber());
                     ps.setTimestamp(13, Timestamp.valueOf(club.getLastSync()));
                 }
+        );
+    }
+    public List<CentralClub> findAllByChampionship(Championship championship) {
+        String sql = "SELECT * FROM central_club WHERE championship = ?";
+        return jdbcTemplate.query(sql, this::mapClub, championship.name());
+    }
+
+    private CentralClub mapClub(ResultSet rs, int rowNum) throws SQLException {
+        return new CentralClub(
+                rs.getString("id"),
+                rs.getString("name"),
+                rs.getString("acronym"),
+                rs.getInt("year_creation"),
+                rs.getString("stadium"),
+                rs.getString("coach_name"),
+                rs.getString("coach_nationality"),
+                Championship.valueOf(rs.getString("championship")),
+                rs.getInt("ranking_points"),
+                rs.getInt("scored_goals"),  // Correction: scored_goals au lieu de getScoredGoals
+                rs.getInt("conceded_goals"), // Correction: conceded_goals au lieu de getConcededGoals
+                rs.getInt("clean_sheet_number"),
+                rs.getTimestamp("last_sync").toLocalDateTime(),
+                rs.getInt("rank")
         );
     }
 }

@@ -46,8 +46,9 @@ CREATE TABLE central_club (
                               conceded_goals INT NOT NULL DEFAULT 0,
                               clean_sheet_number INT NOT NULL DEFAULT 0,
                               last_sync TIMESTAMP WITH TIME ZONE NOT NULL,
+                              rank INTEGER,
                               FOREIGN KEY (championship) REFERENCES championship(name)
-                              rank INTEGER
+
 );
 
 CREATE TABLE central_player (
@@ -62,8 +63,9 @@ CREATE TABLE central_player (
                                 playing_time_value DECIMAL(10,2) NOT NULL DEFAULT 0,
                                 playing_time_unit duration_unit NOT NULL DEFAULT 'MINUTE',
                                 last_sync TIMESTAMP WITH TIME ZONE NOT NULL,
+                                rank INTEGER,
                                 FOREIGN KEY (championship) REFERENCES championship(name)
-                                rank INTEGER
+
 );
 
 

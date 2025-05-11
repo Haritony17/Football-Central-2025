@@ -5,10 +5,7 @@ import org.fifa.api.fifacentral.entity.CentralPlayer;
 import org.fifa.api.fifacentral.entity.DurationUnit;
 import org.fifa.api.fifacentral.service.PlayerService;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -20,8 +17,12 @@ public class PlayerController {
 
     @GetMapping("/bestPlayers")
     public ResponseEntity<List<CentralPlayer>> getBestPlayers(
-            @RequestParam(required = false) Integer top,
-            @RequestParam(required = true) DurationUnit playingTimeUnit) {
+            @RequestParam(required = false, defaultValue = "5") Integer top,
+            @RequestParam(required = false, defaultValue = "HOUR") DurationUnit playingTimeUnit) {
+
+        if (top <= 0) {
+            top = 5;
+        }
 
         return ResponseEntity.ok(playerService.getBestPlayers(top, playingTimeUnit));
     }
