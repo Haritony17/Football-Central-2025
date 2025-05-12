@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 public class CentralController {
     private final SyncService syncService;
 
-    // Méthode pour synchroniser les données sans nécessiter de clé API
     @PostMapping("/synchronization")
     public ResponseEntity<String> synchronizeData(
             @RequestParam String season) {
@@ -23,7 +22,7 @@ public class CentralController {
         }
 
         try {
-            syncService.syncAllChampionships(season);  // Appel de la méthode de synchronisation sans API key
+            syncService.syncAllChampionships(season);
             return ResponseEntity.ok("Synchronization completed for season " + season);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
@@ -34,7 +33,6 @@ public class CentralController {
     // Génération d'une clé API, si besoin pour d'autres usages
     @GetMapping("/generateApiKey")
     public ResponseEntity<String> generateApiKey() {
-        // Dans ce cas, cela pourrait être utilisé pour générer des clés à des fins internes si nécessaire
         return ResponseEntity.ok("API Key generation is disabled in this configuration.");
     }
 }

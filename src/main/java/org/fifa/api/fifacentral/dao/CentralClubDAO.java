@@ -96,8 +96,8 @@ public class CentralClubDAO {
                 rs.getString("coach_nationality"),
                 Championship.valueOf(rs.getString("championship")),
                 rs.getInt("ranking_points"),
-                rs.getInt("scored_goals"),  // Correction: scored_goals au lieu de getScoredGoals
-                rs.getInt("conceded_goals"), // Correction: conceded_goals au lieu de getConcededGoals
+                rs.getInt("scored_goals"),
+                rs.getInt("conceded_goals"),
                 rs.getInt("clean_sheet_number"),
                 rs.getTimestamp("last_sync").toLocalDateTime(),
                 rs.getInt("rank")

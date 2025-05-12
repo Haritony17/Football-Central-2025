@@ -26,7 +26,6 @@ public class ChampionshipApiClient {
 
     public ChampionshipData fetchChampionshipData(Championship championship, String season) {
         try {
-            // Supprime la partie de l'API key dans l'URL
             String url = getChampionshipUrl(championship) + "/data?season=" + season;
             logger.info("Fetching data from: {}", url);
 
@@ -40,7 +39,7 @@ public class ChampionshipApiClient {
                 throw new RuntimeException("Empty response body from API");
             }
 
-            // Validation des données reçues
+
             ChampionshipData data = response.getBody();
             if ((data.getPlayers() == null || data.getPlayers().isEmpty()) &&
                     (data.getClubs() == null || data.getClubs().isEmpty())) {
@@ -55,7 +54,7 @@ public class ChampionshipApiClient {
     }
 
     private String getChampionshipUrl(Championship championship) {
-        // Si tu n'as pas besoin de clé API, on renvoie l'URL directement
+
         switch (championship) {
             case PREMIER_LEAGUE:
                 return premierLeagueUrl;

@@ -25,11 +25,10 @@ public class SyncService {
     private final CentralClubDAO clubRepository;
     private final CentralPlayerDAO playerRepository;
 
-    // Méthode sans besoin d'API Key
     public void syncAllChampionships(String season) {
         for (Championship championship : Championship.values()) {
             try {
-                syncChampionship(championship, season);  // On passe simplement "season" sans l'API key
+                syncChampionship(championship, season);
             } catch (Exception e) {
                 logger.error("Failed to sync {}: {}", championship, e.getMessage());
             }
@@ -39,7 +38,6 @@ public class SyncService {
     private void syncChampionship(Championship championship, String season) {
         String url = getChampionshipUrl(championship) + "/api/seasons/" + season + "/stats";
 
-        // Pas de clé API, donc les headers sont maintenant inutiles
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<String> entity = new HttpEntity<>(headers);
 

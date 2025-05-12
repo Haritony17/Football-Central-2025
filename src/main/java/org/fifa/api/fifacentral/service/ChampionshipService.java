@@ -24,7 +24,7 @@ public class ChampionshipService {
                 .sorted(Comparator.comparingDouble(ChampionshipRanking::getDifferenceGoalsMedian))
                 .collect(Collectors.toList());
 
-        // Attribution des rangs après tri
+
         for (int i = 0; i < rankings.size(); i++) {
             rankings.get(i).setRank(i + 1);
         }
