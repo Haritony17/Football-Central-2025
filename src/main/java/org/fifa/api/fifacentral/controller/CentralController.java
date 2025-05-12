@@ -30,9 +30,4 @@ public class CentralController {
         }
     }
 
-    // Génération d'une clé API, si besoin pour d'autres usages
-    @GetMapping("/generateApiKey")
-    public ResponseEntity<String> generateApiKey() {
-        return ResponseEntity.ok("API Key generation is disabled in this configuration.");
-    }
-}
+  }
