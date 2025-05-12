@@ -1,7 +1,6 @@
 package org.fifa.api.fifacentral.controller;
 
 import lombok.RequiredArgsConstructor;
-import org.fifa.api.fifacentral.service.ApiKeyService;
 import org.fifa.api.fifacentral.service.SyncService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,23 +11,30 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class CentralController {
     private final SyncService syncService;
-    private final ApiKeyService apiKeyService;
 
+    // Méthode pour synchroniser les données sans nécessiter de clé API
     @PostMapping("/synchronization")
     public ResponseEntity<String> synchronizeData(
-            @RequestParam String season,
-            @RequestHeader("X-API-KEY") String apiKey) {
+            @RequestParam String season) {
 
-        if (!apiKeyService.isValid(apiKey)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid API key");
+        if (season == null || season.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Season parameter is required");
         }
 
-        syncService.syncAllChampionships(season, apiKey);
-        return ResponseEntity.ok("Synchronization completed for season " + season);
+        try {
+            syncService.syncAllChampionships(season);  // Appel de la méthode de synchronisation sans API key
+            return ResponseEntity.ok("Synchronization completed for season " + season);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to synchronize data: " + e.getMessage());
+        }
     }
 
+    // Génération d'une clé API, si besoin pour d'autres usages
     @GetMapping("/generateApiKey")
     public ResponseEntity<String> generateApiKey() {
-        return ResponseEntity.ok(apiKeyService.generateKey());
+        // Dans ce cas, cela pourrait être utilisé pour générer des clés à des fins internes si nécessaire
+        return ResponseEntity.ok("API Key generation is disabled in this configuration.");
     }
 }

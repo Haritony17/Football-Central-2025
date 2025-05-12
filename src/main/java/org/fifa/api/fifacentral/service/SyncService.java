@@ -25,21 +25,22 @@ public class SyncService {
     private final CentralClubDAO clubRepository;
     private final CentralPlayerDAO playerRepository;
 
-    public void syncAllChampionships(String season, String apiKey) {
+    // Méthode sans besoin d'API Key
+    public void syncAllChampionships(String season) {
         for (Championship championship : Championship.values()) {
             try {
-                syncChampionship(championship, season, apiKey);
+                syncChampionship(championship, season);  // On passe simplement "season" sans l'API key
             } catch (Exception e) {
                 logger.error("Failed to sync {}: {}", championship, e.getMessage());
             }
         }
     }
 
-    private void syncChampionship(Championship championship, String season, String apiKey) {
+    private void syncChampionship(Championship championship, String season) {
         String url = getChampionshipUrl(championship) + "/api/seasons/" + season + "/stats";
 
+        // Pas de clé API, donc les headers sont maintenant inutiles
         HttpHeaders headers = new HttpHeaders();
-        headers.set("X-API-KEY", apiKey);
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         ResponseEntity<ChampionshipData> response = restTemplate.exchange(
@@ -81,9 +82,7 @@ public class SyncService {
         return switch (championship) {
             case PREMIER_LEAGUE -> "http://localhost:8082";
             case LA_LIGA -> "http://localhost:8083";
-            case BUNDESLIGA -> "http://localhost:8084";
-            case SERIA -> "http://localhost:8085";
-            case LIGUE_1 -> "http://localhost:8086";
+            default -> throw new IllegalArgumentException("Unknown championship: " + championship);
         };
     }
 }
